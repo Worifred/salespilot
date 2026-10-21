@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SalesPilot — Customer Follow-up Assistant</title>
+  <meta name="description" content="A simple customer follow-up tracker for small businesses.">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">S</div>
+        <div>
+          <h1>SalesPilot</h1>
+          <p>Your customers, under control.</p>
+        </div>
+      </div>
+      <span class="plan-badge">FREE PLAN</span>
+    </header>
+
+    <main>
+      <section class="welcome">
+        <p class="eyebrow">YOUR SALES ASSISTANT</p>
+        <h2>Don't lose a customer<br>to a forgotten follow-up.</h2>
+        <p>Keep track of interested customers, remember what they want, and know when to reach out again.</p>
+        <button id="addCustomerBtn" class="primary-btn" type="button">
+          + Add a customer
+        </button>
+      </section>
+
+      <section class="stats">
+        <div class="stat-card">
+          <span>Total customers</span>
+          <strong id="totalCustomers">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Follow-ups today</span>
+          <strong id="todayFollowups">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Awaiting a sale</span>
+          <strong id="openCustomers">0</strong>
+        </div>
+      </section>
+
+      <section id="customerFormSection" class="panel" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CUSTOMER DETAILS</p>
+            <h2>Add a customer</h2>
+          </div>
+          <button id="cancelFormBtn" class="text-btn" type="button">Cancel</button>
+        </div>
+
+        <form id="customerForm">
+          <label for="customerName">Customer name *</label>
+          <input id="customerName" name="customerName" required placeholder="e.g. Chika Okafor">
+
+          <label for="customerPhone">WhatsApp phone number *</label>
+          <input id="customerPhone" name="customerPhone" type="tel" required placeholder="e.g. 08012345678">
+
+          <label for="product">Product they want *</label>
+          <input id="product" name="product" required placeholder="e.g. iPhone 13, 128GB">
+
+          <label for="budget">Customer's budget (₦)</label>
+          <input id="budget" name="budget" type="number" min="0" placeholder="e.g. 450000">
+
+          <label for="lastContact">Last conversation</label>
+          <input id="lastContact" name="lastContact" type="date">
+
+          <label for="followupDate">Next follow-up date *</label>
+          <input id="followupDate" name="followupDate" type="date" required>
+
+          <label for="customerNotes">Notes</label>
+          <textarea id="customerNotes" name="customerNotes" rows="3" placeholder="Preferred colour, questions asked, concerns..."></textarea>
+
+          <button class="primary-btn full-btn" type="submit">Save customer</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">YOUR CUSTOMER LIST</p>
+            <h2>Follow-up tracker</h2>
+          </div>
+          <span id="customerCount" class="count-badge">0 saved</span>
+        </div>
+
+        <input id="searchCustomers" class="search-input" type="search" placeholder="Search by customer or product...">
+
+        <div class="filter-row">
+          <button class="filter-btn active" data-filter="all" type="button">All</button>
+          <button class="filter-btn" data-filter="due" type="button">Due today</button>
+          <button class="filter-btn" data-filter="upcoming" type="button">Upcoming</button>
+          <button class="filter-btn" data-filter="sold" type="button">Sold</button>
+        </div>
+
+        <div id="customerList" class="customer-list">
+          <div class="empty-state">
+            <div class="empty-icon">♡</div>
+            <h3>Your customer list starts here</h3>
+            <p>Add a customer who has shown interest but hasn't bought yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="tip-panel">
+        <div class="tip-icon">✦</div>
+        <div>
+          <h3>A better way to follow up</h3>
+          <p>Be helpful, not pushy. A friendly reminder about the product a customer asked for can reopen a conversation without pressure.</p>
+        </div>
+      </section>
+
+      <footer>
+        <p>SalesPilot · Simple tools for growing businesses</p>
+        <p>Your customer information stays in this browser in this first demo.</p>
+      </footer>
+    </main>
+  </div>
+
+</body>
+</html>
