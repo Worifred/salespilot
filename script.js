@@ -5,6 +5,14 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
+
+const authSection = document.getElementById("authSection");
+const authForm = document.getElementById("authForm");
+const authHeading = document.getElementById("authHeading");
+const authSubmit = document.getElementById("authSubmit");
+const authToggle = document.getElementById("authToggle");
+const authMessage = document.getElementById("authMessage");
+
 const customerForm = document.getElementById("customerForm");
 const customerFormSection = document.getElementById("customerFormSection");
 const customerList = document.getElementById("customerList");
@@ -12,13 +20,9 @@ const searchCustomers = document.getElementById("searchCustomers");
 
 let customers = [];
 let currentFilter = "all";
-
-try {
-  customers = JSON.parse(localStorage.getItem("salesPilotCustomers") || "[]");
-  if (!Array.isArray(customers)) customers = [];
-} catch {
-  customers = [];
-}
+let currentUser = null;
+let authMode = "signup";
+let dashboardSections = [];
 
 function localDateString(date = new Date()) {
   const year = date.getFullYear();
@@ -37,12 +41,151 @@ function escapeHTML(value = "") {
   })[char]);
 }
 
-function saveCustomers() {
-  localStorage.setItem("salesPilotCustomers", JSON.stringify(customers));
+function showMessage(message, isError = false) {
+  authMessage.textContent = message;
+  authMessage.style.color = isError ? "#b42318" : "";
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  authHeading.textContent =
+    mode === "signup" ? "Create your free account" : "Welcome back";
+  authSubmit.textContent =
+    mode === "signup" ? "Create account" : "Sign in";
+  authToggle.textContent =
+    mode === "signup"
+      ? "Already have an account? Sign in"
+      : "New to SalesPilot? Create an account";
+
+  document.getElementById("authPassword").autocomplete =
+    mode === "signup" ? "new-password" : "current-password";
+
+  showMessage("");
+}
+
+authToggle.addEventListener("click", () => {
+  setAuthMode(authMode === "signup" ? "signin" : "signup");
+});
+
+authForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  authSubmit.disabled = true;
+  showMessage(authMode === "signup" ? "Creating your account..." : "Signing in...");
+
+  try {
+    if (authMode === "signup") {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        showMessage("Account created successfully!");
+      } else {
+        showMessage("Account created. Check your email for a confirmation link, then sign in.");
+      }
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+      showMessage("Signed in successfully!");
+    }
+  } catch (error) {
+    showMessage(error.message || "Authentication failed. Please try again.", true);
+  } finally {
+    authSubmit.disabled = false;
+  }
+});
+
+// Keep the login screen visible until Supabase confirms a signed-in session.
+const main = document.querySelector("main");
+dashboardSections = Array.from(main.children).filter(
+  element => element.id !== "authSection"
+);
+
+const signOutButton = document.createElement("button");
+signOutButton.type = "button";
+signOutButton.className = "text-btn";
+signOutButton.textContent = "Sign out";
+signOutButton.hidden = true;
+signOutButton.style.marginLeft = "auto";
+document.querySelector(".topbar").appendChild(signOutButton);
+
+function updateScreen() {
+  const signedIn = Boolean(currentUser);
+
+  authSection.hidden = signedIn;
+  dashboardSections.forEach(section => {
+    section.hidden = !signedIn;
+  });
+  signOutButton.hidden = !signedIn;
+
+  if (!signedIn) {
+    customerFormSection.hidden = true;
+  }
+}
+
+signOutButton.addEventListener("click", async () => {
+  signOutButton.disabled = true;
+
+  const { error } = await supabaseClient.auth.signOut();
+
+  signOutButton.disabled = false;
+
+  if (error) {
+    alert("Could not sign out: " + error.message);
+  }
+});
+
+function fromDatabase(row) {
+  return {
+    id: row.id,
+    name: row.customer_name || "",
+    phone: row.phone || "",
+    product: row.enquiry || "",
+    budget: row.budget == null ? "" : String(row.budget),
+    lastContact: row.last_contact || "",
+    followupDate: row.follow_up_date || "",
+    notes: row.notes || "",
+    status: row.status === "sold" ? "sold" : "open",
+    createdAt: row.created_at
+  };
+}
+
+async function loadCustomers() {
+  if (!currentUser) return;
+
+  customerList.innerHTML = '<p class="empty-state">Loading customers...</p>';
+
+  const { data, error } = await supabaseClient
+    .from("customers")
+    .select("*")
+    .eq("user_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    customerList.innerHTML =
+      '<p class="empty-state">Could not load customers. Please refresh and try again.</p>';
+    console.error("Load customers error:", error.message);
+    return;
+  }
+
+  customers = (data || []).map(fromDatabase);
   renderCustomers();
 }
 
 function showCustomerForm() {
+  if (!currentUser) return;
+
   customerFormSection.hidden = false;
   document.getElementById("customerName").focus();
   customerFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -55,35 +198,65 @@ document.getElementById("cancelFormBtn").addEventListener("click", () => {
   customerFormSection.hidden = true;
 });
 
-customerForm.addEventListener("submit", event => {
+customerForm.addEventListener("submit", async event => {
   event.preventDefault();
 
-  const form = new FormData(customerForm);
-  const customer = {
-    id: crypto.randomUUID
-      ? crypto.randomUUID()
-      : String(Date.now()) + Math.random().toString(16).slice(2),
-    name: String(form.get("customerName") || "").trim(),
-    phone: String(form.get("customerPhone") || "").trim(),
-    product: String(form.get("product") || "").trim(),
-    budget: String(form.get("budget") || "").trim(),
-    lastContact: String(form.get("lastContact") || ""),
-    followupDate: String(form.get("followupDate") || ""),
-    notes: String(form.get("customerNotes") || "").trim(),
-    status: "open",
-    createdAt: new Date().toISOString()
-  };
+  if (!currentUser) {
+    alert("Please sign in first.");
+    return;
+  }
 
-  if (!customer.name || !customer.phone || !customer.product || !customer.followupDate) {
+  const submitButton = customerForm.querySelector('[type="submit"]');
+  const form = new FormData(customerForm);
+
+  const name = String(form.get("customerName") || "").trim();
+  const phone = String(form.get("customerPhone") || "").trim();
+  const product = String(form.get("product") || "").trim();
+  const budgetValue = String(form.get("budget") || "").trim();
+  const lastContact = String(form.get("lastContact") || "");
+  const followupDate = String(form.get("followupDate") || "");
+  const notes = String(form.get("customerNotes") || "").trim();
+
+  if (!name || !phone || !product || !followupDate) {
     alert("Please fill in all required fields.");
     return;
   }
 
-  customers.unshift(customer);
-  saveCustomers();
-  customerForm.reset();
-  customerFormSection.hidden = true;
-  alert("Customer saved successfully!");
+  const customerRow = {
+    user_id: currentUser.id,
+    customer_name: name,
+    phone,
+    enquiry: product,
+    budget: budgetValue === "" ? null : Number(budgetValue),
+    last_contact: lastContact || null,
+    follow_up_date: followupDate,
+    follow_up_time: null,
+    notes: notes || null,
+    message: null,
+    status: "pending"
+  };
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Saving...";
+
+  try {
+    const { error } = await supabaseClient
+      .from("customers")
+      .insert(customerRow);
+
+    if (error) throw error;
+
+    customerForm.reset();
+    customerFormSection.hidden = true;
+    await loadCustomers();
+    alert("Customer saved successfully!");
+  } catch (error) {
+    console.error("Save customer error:", error.message);
+    alert("Could not save the customer: " + error.message);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Save customer";
+  }
 });
 
 function getFollowupStatus(customer) {
@@ -105,9 +278,7 @@ function openWhatsApp(customer) {
 
   if (phone.startsWith("0")) {
     phone = "234" + phone.slice(1);
-  } else if (phone.startsWith("234")) {
-    // Already using Nigeria's country code.
-  } else if (phone.startsWith("0") === false && phone.length === 10) {
+  } else if (!phone.startsWith("234") && phone.length === 10) {
     phone = "234" + phone;
   }
 
@@ -120,13 +291,14 @@ function openWhatsApp(customer) {
 function renderCustomers() {
   const today = localDateString();
   const openCustomers = customers.filter(customer => customer.status !== "sold");
-  const dueCustomers = openCustomers.filter(customer => customer.followupDate <= today);
+  const dueCustomers = openCustomers.filter(
+    customer => customer.followupDate && customer.followupDate <= today
+  );
 
   document.getElementById("totalCustomers").textContent = customers.length;
   document.getElementById("todayFollowups").textContent = dueCustomers.length;
   document.getElementById("openCustomers").textContent = openCustomers.length;
-  document.getElementById("customerCount").textContent =
-    `${customers.length} saved`;
+  document.getElementById("customerCount").textContent = `${customers.length} saved`;
 
   const query = searchCustomers.value.trim().toLowerCase();
 
@@ -141,6 +313,7 @@ function renderCustomers() {
       (currentFilter === "sold" && customer.status === "sold") ||
       (currentFilter === "due" &&
         customer.status !== "sold" &&
+        customer.followupDate &&
         customer.followupDate <= today) ||
       (currentFilter === "upcoming" &&
         customer.status !== "sold" &&
@@ -183,6 +356,9 @@ function renderCustomers() {
               : "Not specified"
           }</p>
           <p><strong>Follow up:</strong> ${escapeHTML(customer.followupDate)}</p>
+          ${customer.lastContact
+            ? `<p><strong>Last conversation:</strong> ${escapeHTML(customer.lastContact)}</p>`
+            : ""}
           ${customer.notes
             ? `<p><strong>Notes:</strong> ${escapeHTML(customer.notes)}</p>`
             : ""}
@@ -213,30 +389,92 @@ document.querySelectorAll(".filter-btn").forEach(button => {
   });
 });
 
-customerList.addEventListener("click", event => {
+customerList.addEventListener("click", async event => {
   const button = event.target.closest("button[data-action]");
-  if (!button) return;
+  if (!button || !currentUser) return;
 
-  const customer = customers.find(item => item.id === button.dataset.id);
+  const customer = customers.find(
+    item => String(item.id) === button.dataset.id
+  );
   if (!customer) return;
 
   if (button.dataset.action === "whatsapp") {
     openWhatsApp(customer);
+    return;
   }
 
   if (button.dataset.action === "sold") {
-    if (confirm(`Mark ${customer.name} as a completed sale?`)) {
-      customer.status = "sold";
-      saveCustomers();
+    if (!confirm(`Mark ${customer.name} as a completed sale?`)) return;
+
+    button.disabled = true;
+
+    const { error } = await supabaseClient
+      .from("customers")
+      .update({ status: "sold" })
+      .eq("id", customer.id)
+      .eq("user_id", currentUser.id);
+
+    if (error) {
+      alert("Could not update this customer: " + error.message);
+    } else {
+      await loadCustomers();
     }
+
+    button.disabled = false;
   }
 
   if (button.dataset.action === "delete") {
-    if (confirm(`Delete ${customer.name} from your customer list?`)) {
-      customers = customers.filter(item => item.id !== customer.id);
-      saveCustomers();
+    if (!confirm(`Delete ${customer.name} from your customer list?`)) return;
+
+    button.disabled = true;
+
+    const { error } = await supabaseClient
+      .from("customers")
+      .delete()
+      .eq("id", customer.id)
+      .eq("user_id", currentUser.id);
+
+    if (error) {
+      alert("Could not delete this customer: " + error.message);
+    } else {
+      await loadCustomers();
     }
+
+    button.disabled = false;
   }
 });
 
-renderCustomers();
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null;
+  updateScreen();
+
+  if (currentUser) {
+    // Defer database work until after the auth callback completes.
+    setTimeout(() => loadCustomers(), 0);
+  } else {
+    customers = [];
+    renderCustomers();
+    showMessage("");
+  }
+});
+
+async function initializeSalesPilot() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    showMessage("Could not check your sign-in status. Please refresh.", true);
+    return;
+  }
+
+  currentUser = data.session?.user || null;
+  updateScreen();
+
+  if (currentUser) {
+    await loadCustomers();
+  } else {
+    renderCustomers();
+  }
+}
+
+setAuthMode("signup");
+initializeSalesPilot();
