@@ -1,4 +1,10 @@
+const SUPABASE_URL = "https://vqmuycanfvbedlcevhsk.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_D5dTxH10R5C2YJBiQ6PqJA_eO515r9_";
 
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 const customerForm = document.getElementById("customerForm");
 const customerFormSection = document.getElementById("customerFormSection");
 const customerList = document.getElementById("customerList");
