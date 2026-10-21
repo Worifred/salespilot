@@ -48,10 +48,13 @@ function showMessage(message, isError = false) {
 
 function setAuthMode(mode) {
   authMode = mode;
+
   authHeading.textContent =
-    mode === "signup" ? "Create your free account" : "Welcome back";
+    mode === "signup" ? "Create your account" : "Welcome back";
+
   authSubmit.textContent =
     mode === "signup" ? "Create account" : "Sign in";
+
   authToggle.textContent =
     mode === "signup"
       ? "Already have an account? Sign in"
@@ -59,6 +62,12 @@ function setAuthMode(mode) {
 
   document.getElementById("authPassword").autocomplete =
     mode === "signup" ? "new-password" : "current-password";
+
+  const ownerNameGroup = document.getElementById("ownerNameGroup");
+  const ownerNameInput = document.getElementById("ownerNameInput");
+
+  ownerNameGroup.hidden = mode !== "signup";
+  ownerNameInput.required = mode === "signup";
 
   showMessage("");
 }
@@ -78,13 +87,24 @@ authForm.addEventListener("submit", async event => {
 
   try {
     if (authMode === "signup") {
-      const { data, error } = await supabaseClient.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: "https://worifred.github.io/salespilot/"
+  const ownerName = document.getElementById("ownerNameInput").value.trim();
+
+  if (!ownerName) {
+    showMessage("Please enter the business owner's name.");
+    return;
   }
-});
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: "https://worifred.github.io/salespilot/",
+      data: {
+        owner_name: ownerName
+      }
+    }
+  });
+
       if (error) throw error;
 
       if (data.session) {
@@ -122,6 +142,7 @@ signOutButton.hidden = true;
 signOutButton.style.marginLeft = "auto";
 document.querySelector(".topbar").appendChild(signOutButton);
 
+
 function updateScreen() {
   const signedIn = Boolean(currentUser);
 
@@ -130,6 +151,17 @@ function updateScreen() {
     section.hidden = !signedIn;
   });
   signOutButton.hidden = !signedIn;
+
+  const ownerNameLabel = document.getElementById("ownerName");
+
+  if (signedIn && ownerNameLabel) {
+    const savedName = currentUser.user_metadata?.owner_name;
+    const emailName = currentUser.email
+      ? currentUser.email.split("@")[0]
+      : "Business owner";
+
+    ownerNameLabel.textContent = savedName || emailName;
+  }
 
   if (!signedIn) {
     customerFormSection.hidden = true;
