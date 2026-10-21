@@ -33,22 +33,34 @@
   <h2 id="authHeading">Create your free account</h2>
   <p>Sign in securely to manage your customer follow-ups.</p>
 
-  <form id="authForm">
-    <label for="authEmail">Email address</label>
-    <input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com">
+  
+<form id="authForm">
+  <div id="ownerNameGroup">
+    <label for="ownerNameInput">Business owner's name</label>
+    <input
+      id="ownerNameInput"
+      type="text"
+      autocomplete="name"
+      placeholder="Enter your name"
+    >
+  </div>
 
-    <label for="authPassword">Password</label>
-    <input id="authPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+  <label for="authEmail">Email address</label>
+  <input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com">
 
-    <button id="authSubmit" class="primary-btn full-btn" type="submit">Create account</button>
-  </form>
+  <label for="authPassword">Password</label>
+  <input id="authPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
 
-  <p id="authMessage" role="status"></p>
+  <button id="authSubmit" class="primary-btn full-btn" type="submit">Create account</button>
+</form>
 
-  <button id="authToggle" class="text-btn" type="button">
-    Already have an account? Sign in
-  </button>
+<p id="authMessage" role="status"></p>
+
+<button id="authToggle" class="text-btn" type="button">
+  Already have an account? Sign in
+</button>
 </section>
+
       <section class="welcome">
         <p class="eyebrow">YOUR SALES ASSISTANT</p>
         <h2>Don't lose a customer<br>to a forgotten follow-up.</h2>
