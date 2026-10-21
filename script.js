@@ -79,10 +79,12 @@ authForm.addEventListener("submit", async event => {
   try {
     if (authMode === "signup") {
       const { data, error } = await supabaseClient.auth.signUp({
-        email,
-        password
-      });
-
+  email,
+  password,
+  options: {
+    emailRedirectTo: "https://worifred.github.io/salespilot/"
+  }
+});
       if (error) throw error;
 
       if (data.session) {
