@@ -222,6 +222,9 @@ function showCustomerForm() {
   if (!currentUser) return;
 
   customerFormSection.hidden = false;
+  const saveMessage = document.getElementById("customerSaveMessage");
+saveMessage.hidden = true;
+saveMessage.textContent = "";
   document.getElementById("customerName").focus();
   customerFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
