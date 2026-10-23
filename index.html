@@ -13,6 +13,16 @@
 
   <div class="app">
     <div id="successToast" class="success-toast" role="status" aria-live="polite" hidden></div>
+    <div id="deleteConfirmModal" class="delete-confirm-modal" hidden>
+  <div class="delete-confirm-box" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+    <h2 id="deleteConfirmTitle">Delete customer?</h2>
+    <p id="deleteConfirmText">Are you sure you want to delete this customer from SalesPilot?</p>
+    <div class="delete-confirm-actions">
+      <button id="cancelDeleteBtn" class="text-btn" type="button">Cancel</button>
+      <button id="confirmDeleteBtn" class="delete-confirm-btn" type="button">Yes, delete</button>
+    </div>
+  </div>
+</div>
     <header class="topbar">
             <div class="brand">
         <div class="brand-icon">S</div>
