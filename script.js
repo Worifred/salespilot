@@ -149,6 +149,7 @@ function updateScreen() {
   authSection.hidden = signedIn;
   dashboardSections.forEach(section => {
     section.hidden = !signedIn;
+    customerFormSection.hidden = true;
   });
   signOutButton.hidden = !signedIn;
 
