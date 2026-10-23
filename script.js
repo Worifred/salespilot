@@ -309,7 +309,9 @@ customerForm.addEventListener("submit", async event => {
     customerForm.reset();
     customerFormSection.hidden = true;
     await loadCustomers();
-    alert("Customer saved successfully!");
+    const saveMessage = document.getElementById("customerSaveMessage");
+saveMessage.textContent = "Customer saved successfully!";
+saveMessage.hidden = false;
   } catch (error) {
     console.error("Save customer error:", error.message);
     alert("Could not save the customer: " + error.message);
