@@ -484,10 +484,11 @@ customerList.addEventListener("click", async event => {
       .eq("user_id", currentUser.id);
 
     if (error) {
-      alert("Could not update this customer: " + error.message);
-    } else {
-      await loadCustomers();
-    }
+  alert("Could not update this customer: " + error.message);
+} else {
+  await loadCustomers();
+  showSuccessToast("Customer marked as sold successfully!");
+}
 
     button.disabled = false;
   }
