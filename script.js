@@ -249,7 +249,6 @@ document.getElementById("addCustomerBtn").addEventListener("click", async () => 
     return;
   }
 
-  showCustomerForm();
 });
 
 document.getElementById("cancelFormBtn").addEventListener("click", () => {
