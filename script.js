@@ -507,6 +507,7 @@ customerList.addEventListener("click", async event => {
       alert("Could not delete this customer: " + error.message);
     } else {
       await loadCustomers();
+      showSuccessToast("Customer deleted successfully!");
     }
 
     button.disabled = false;
