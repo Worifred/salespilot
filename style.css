@@ -632,3 +632,30 @@ footer p {
     grid-template-columns: 1fr;
   }
 }
+
+.success-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  max-width: calc(100% - 32px);
+  padding: 15px 22px;
+  border: 1px solid #b7e4c7;
+  border-radius: 12px;
+  background: #eaf8ef;
+  color: #187443;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.success-toast[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 600px) {
+  .success-toast {
+    top: 12px;
+    right: 12px;
+  }
+}
