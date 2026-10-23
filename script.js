@@ -236,7 +236,7 @@ function showCustomerForm() {
   if (!currentUser) return;
 
   customerFormSection.hidden = false;
- showSuccessToast("Customer saved successfully!");
+ // No popup when opening the customer form.
   document.getElementById("customerName").focus();
   customerFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
