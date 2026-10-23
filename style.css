@@ -537,3 +537,98 @@ footer p {
     flex-direction: column;
   }
 }
+
+
+/* Subscription payment popup */
+.subscription-modal[hidden] {
+  display: none !important;
+}
+
+.subscription-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.7);
+  overflow-y: auto;
+}
+
+.subscription-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  border-radius: 18px;
+  background: #fff;
+  color: #222;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  font-size: 30px;
+  cursor: pointer;
+  color: #555;
+}
+
+.subscription-modal-content h2 {
+  margin-top: 8px;
+}
+
+.subscription-plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.plan-card {
+  padding: 20px;
+  border: 1px solid #f0b6ce;
+  border-radius: 14px;
+  background: #fff8fb;
+}
+
+.plan-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #c2185b;
+}
+
+.plan-price span {
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+}
+
+.plan-card .primary-btn {
+  width: 100%;
+}
+
+#paymentMessage {
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+  .subscription-modal {
+    padding: 12px;
+  }
+
+  .subscription-modal-content {
+    padding: 24px 18px;
+  }
+
+  .subscription-plans {
+    grid-template-columns: 1fr;
+  }
+}
