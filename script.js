@@ -501,6 +501,7 @@ customerList.addEventListener("click", async event => {
   modal.dataset.customerId = String(customer.id);
   modal.hidden = false;
 }
+});
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session?.user || null;
@@ -601,4 +602,37 @@ document
   .addEventListener("click", () => {
     document.getElementById("subscriptionModal").hidden = true;
   });
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
+cancelDeleteBtn.addEventListener("click", () => {
+  deleteConfirmModal.hidden = true;
+  deleteConfirmModal.dataset.customerId = "";
+});
+
+confirmDeleteBtn.addEventListener("click", async () => {
+  const customerId = deleteConfirmModal.dataset.customerId;
+  if (!customerId || !currentUser) return;
+
+  confirmDeleteBtn.disabled = true;
+  confirmDeleteBtn.textContent = "Deleting...";
+
+  const { error } = await supabaseClient
+    .from("customers")
+    .delete()
+    .eq("id", customerId)
+    .eq("user_id", currentUser.id);
+
+  confirmDeleteBtn.disabled = false;
+  confirmDeleteBtn.textContent = "Yes, delete";
+  deleteConfirmModal.hidden = true;
+  deleteConfirmModal.dataset.customerId = "";
+
+  if (error) {
+    alert("Could not delete this customer: " + error.message);
+  } else {
+    await loadCustomers();
+    showSuccessToast("Customer deleted successfully!");
+  }
+});
