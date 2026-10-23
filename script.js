@@ -228,9 +228,7 @@ function showCustomerForm() {
   if (!currentUser) return;
 
   customerFormSection.hidden = false;
-  const saveMessage = document.getElementById("customerSaveMessage");
-saveMessage.hidden = true;
-saveMessage.textContent = "";
+ showSuccessToast("Customer saved successfully!");
   document.getElementById("customerName").focus();
   customerFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
