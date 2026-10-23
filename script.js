@@ -512,3 +512,64 @@ async function initializeSalesPilot() {
 
 setAuthMode("signup");
 initializeSalesPilot();
+
+async function startSubscriptionPayment(plan) {
+  const message = document.getElementById("paymentMessage");
+  const monthlyButton = document.getElementById("monthlyPlanBtn");
+  const yearlyButton = document.getElementById("yearlyPlanBtn");
+
+  if (!currentUser) {
+    message.textContent = "Please sign in before subscribing.";
+    return;
+  }
+
+  message.textContent = "Preparing secure checkout...";
+  monthlyButton.disabled = true;
+  yearlyButton.disabled = true;
+
+  try {
+    const { data: sessionData } =
+      await supabaseClient.auth.getSession();
+
+    const token = sessionData.session?.access_token;
+
+    if (!token) {
+      throw new Error("Please sign in again.");
+    }
+
+    const { data, error } = await supabaseClient.functions.invoke(
+      "initialize-payment",
+      {
+        body: { plan },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (error) {
+      throw new Error("Could not start checkout. Please try again.");
+    }
+
+    if (!data?.authorization_url) {
+      throw new Error(data?.error || "Checkout link was not returned.");
+    }
+
+    window.location.href = data.authorization_url;
+  } catch (error) {
+    message.textContent =
+      error.message || "Payment could not be started. Please try again.";
+  } finally {
+    monthlyButton.disabled = false;
+    yearlyButton.disabled = false;
+  }
+}
+
+document
+  .getElementById("monthlyPlanBtn")
+  .addEventListener("click", () => startSubscriptionPayment("monthly"));
+
+document
+  .getElementById("yearlyPlanBtn")
+  .addEventListener("click", () => startSubscriptionPayment("yearly"));
+
