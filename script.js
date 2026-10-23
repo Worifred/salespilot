@@ -494,26 +494,13 @@ customerList.addEventListener("click", async event => {
   }
 
   if (button.dataset.action === "delete") {
-    if (!confirm(`Delete ${customer.name} from your customer list?`)) return;
+  const modal = document.getElementById("deleteConfirmModal");
+  document.getElementById("deleteConfirmText").textContent =
+    `Are you sure you want to delete ${customer.name} from SalesPilot?`;
 
-    button.disabled = true;
-
-    const { error } = await supabaseClient
-      .from("customers")
-      .delete()
-      .eq("id", customer.id)
-      .eq("user_id", currentUser.id);
-
-    if (error) {
-      alert("Could not delete this customer: " + error.message);
-    } else {
-      await loadCustomers();
-      showSuccessToast("Customer deleted successfully!");
-    }
-
-    button.disabled = false;
-  }
-});
+  modal.dataset.customerId = String(customer.id);
+  modal.hidden = false;
+}
 
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session?.user || null;
