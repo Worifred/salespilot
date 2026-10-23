@@ -514,6 +514,7 @@ customerList.addEventListener("click", async event => {
 supabaseClient.auth.onAuthStateChange((event, session) => {
   currentUser = session?.user || null;
   updateScreen();
+  document.documentElement.classList.add("app-ready");
 
   if (currentUser) {
     // Defer database work until after the auth callback completes.
