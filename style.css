@@ -709,3 +709,7 @@ footer p {
   color: #fff;
   font-weight: 700;
 }
+
+html:not(.app-ready) main {
+  visibility: hidden;
+}
