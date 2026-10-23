@@ -597,4 +597,9 @@ document
 document
   .getElementById("yearlyPlanBtn")
   .addEventListener("click", () => startSubscriptionPayment("yearly"));
+document
+  .getElementById("closeSubscriptionModal")
+  .addEventListener("click", () => {
+    document.getElementById("subscriptionModal").hidden = true;
+  });
 
