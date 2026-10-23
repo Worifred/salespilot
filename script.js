@@ -245,11 +245,12 @@ document.getElementById("addCustomerBtn").addEventListener("click", async () => 
     return;
   }
 
-  if (!data || data.length === 0) {
+   if (!data || data.length === 0) {
     document.getElementById("subscriptionModal").hidden = false;
     return;
   }
 
+  showCustomerForm();
 });
 
 document.getElementById("cancelFormBtn").addEventListener("click", () => {
