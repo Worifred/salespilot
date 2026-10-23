@@ -225,7 +225,32 @@ function showCustomerForm() {
   customerFormSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-document.getElementById("addCustomerBtn").addEventListener("click", showCustomerForm);
+document.getElementById("addCustomerBtn").addEventListener("click", async () => {
+  if (!currentUser) {
+    showMessage("Please sign in first.", true);
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", currentUser.id)
+    .eq("status", "active")
+    .gt("current_period_end", new Date().toISOString())
+    .limit(1);
+
+  if (error) {
+    showMessage("Could not check your subscription. Please try again.", true);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    document.getElementById("subscriptionModal").hidden = false;
+    return;
+  }
+
+  showCustomerForm();
+});
 
 document.getElementById("cancelFormBtn").addEventListener("click", () => {
   customerForm.reset();
