@@ -41,6 +41,12 @@ function escapeHTML(value = "") {
   })[char]);
 }
 
+function showSuccessToast(message) {
+  const toast = document.getElementById("successToast");
+  toast.textContent = message;
+  toast.hidden = false;
+}
+
 function showMessage(message, isError = false) {
   authMessage.textContent = message;
   authMessage.style.color = isError ? "#b42318" : "";
