@@ -536,7 +536,7 @@ async function initializeSalesPilot() {
   }
 }
 
-setAuthMode("signup");
+setAuthMode("signin");
 initializeSalesPilot();
 
 async function startSubscriptionPayment(plan) {
