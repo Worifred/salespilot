@@ -41,10 +41,18 @@ function escapeHTML(value = "") {
   })[char]);
 }
 
+let toastTimer;
+
 function showSuccessToast(message) {
   const toast = document.getElementById("successToast");
   toast.textContent = message;
   toast.hidden = false;
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 3000);
 }
 
 function showMessage(message, isError = false) {
